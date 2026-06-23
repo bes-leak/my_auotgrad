@@ -1,1 +1,9 @@
-pytest
+-e git+https://github.com/bes-leak/my_auotgrad.git@471eea8b2dc48ef0cf8929a1c5e41fe7daba9d28#egg=autograd
+colorama==0.4.6
+iniconfig==2.3.0
+numpy==2.5.0
+packaging==26.2
+pluggy==1.6.0
+Pygments==2.20.0
+pytest==9.0.3
+ruff==0.15.16

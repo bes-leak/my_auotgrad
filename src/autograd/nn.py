@@ -1,49 +1,31 @@
-import random
-from autograd import Value
+from .tensor import Tensor
+import numpy as np
 
 
-class Neuron:
-    def __init__(self, ninput):
-        self.w = [Value(random.uniform(-1.0, 1.0)) for _ in range(ninput)]
-        self.b = Value(random.uniform(-1.0, 1.0))
-        self.n = ninput
+class Linear:
+    def __init__(self, ninput, noutput):
+        self.ninput = ninput
+        self.noutput = noutput
+        self.w = Tensor(np.random.uniform(-1, 1, (ninput, noutput)))
+        self.b = Tensor(np.random.uniform(-1, 1, noutput))
 
-    def __call__(self, x):
-        act = self.b
-
-        if len(self.w) != len(x):
-            raise ValueError("size of x is not equal to ninput")
-
-        for i in range(self.n):
-            act += self.w[i] * x[i]
-
-        return act.tanh()
+    def __call__(self, X):
+        out = (X @ self.w + self.b).tanh()
+        return out
 
     def parameters(self):
-        return self.w + [self.b]
+        return [self.w, self.b]
 
 
-class Layer:
-    def __init__(self, nin, nout):
-        self.neurons = [Neuron(nin) for _ in range(nout)]
-        self.nout = nout
-
-    def __call__(self, x):
-        outs = [n(x) for n in self.neurons]
-        return outs[0] if len(outs) == 1 else outs
-
-    def parameters(self):
-        return [p for n in self.neurons for p in n.parameters()]
 
 class MLP:
-    def __init__(self, nin, nout):
-        sizes = [nin] + nout
-        self.layers = [Layer(sizes[i], sizes[i+1]) for i in range(len(nout))]
+    def __init__(self, ninput, noutput):
+        self.layers = [Linear(nin, nout) for nin, nout in zip([ninput] + noutput[:-1], noutput)]
 
-    def __call__(self, x):
+    def __call__(self, X):
         for layer in self.layers:
-            x = layer(x)
-        return x
+            X = layer(X)
+        return X
 
     def parameters(self):
         return [p for layer in self.layers for p in layer.parameters()]
